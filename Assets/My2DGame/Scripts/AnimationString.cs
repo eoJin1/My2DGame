@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace My2DGame
 {
     /// <summary>
@@ -8,5 +9,7 @@ namespace My2DGame
     {
         public static string IsMove = "IsMove";
         public static string IsRun = "IsRun";
+        public static string IsGrounded = "IsGrounded";
+
     }
 }

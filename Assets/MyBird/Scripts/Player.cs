@@ -37,8 +37,7 @@ namespace MyBird
         public GameObject gameoverUI;
 
         //사운드
-        private AudioSource audioSource;
-
+        private AudioSource audioSource;                //포인트 사운드
         #endregion
 
         #region Unity Event Method
@@ -91,12 +90,7 @@ namespace MyBird
         private void OnCollisionEnter2D(Collision2D collision)
         {
             //충돌한 충돌체 체크
-            if(collision.gameObject.tag == "Pipe")
-            {
-                //Debug.Log("기둥과 충돌");
-                GameOver();
-            }
-            else if (collision.gameObject.tag == "Ground")
+            if (collision.gameObject.tag == "Ground")
             {
                 //Debug.Log("그라운드와 충돌");
                 GameOver();
@@ -109,7 +103,12 @@ namespace MyBird
             //충돌한 충돌체 체크
             if(collision.gameObject.tag == "Point")
             {
-                GetPoint();
+                GetPoint();                
+            }
+            else if (collision.gameObject.tag == "Pipe")
+            {
+                //Debug.Log("기둥과 충돌");
+                GameOver();
             }
         }
         #endregion
@@ -119,18 +118,16 @@ namespace MyBird
         void GetPoint()
         {
             GameManager.Score++;
-
+            
             //효과: vfx, sfx
             audioSource.Play();
 
-            //게임 포인트 체크 - 기둥을 10개 통과할 때마다
-            if(GameManager.Score%10 == 0 )
+            //게임 포인트 체크 - 기둥을 10개 통과할때마다
+            if(GameManager.Score%10 == 0)
             {
                 //레벨링
                 GameManager.spawnValue += 0.05f;
             }
-            
-            //Debug.Log($"점수: {GameManager.Score}");
         }
 
 
@@ -147,12 +144,11 @@ namespace MyBird
             if (GameManager.IsDeath)
                 return;
 
-#if UNITY_EDITOR    //유니티 에디터에서 마우스와 키보드 입력 처리
+#if UNITY_EDITOR    //유니티 에디터 마우스와 키보드 입력 처리
             //스페이스 키 OR 마우스 왼클릭으로 입력받기
             keyJump |= Input.GetKeyDown(KeyCode.Space);
             keyJump |= Input.GetMouseButtonDown(0);
-
-#else       //그 외 플랫폼에서 터치 입력 처리
+#else   //그외 플랫폼에서 터치 입력 처리
             if(Input.touchCount > 0)
             {
                 //첫번째 들어온 터치 가져오기
@@ -164,6 +160,7 @@ namespace MyBird
                 }
             }
 #endif
+
             //플레이어 이동 시작
             if (GameManager.IsStart == false && keyJump == true)
             {

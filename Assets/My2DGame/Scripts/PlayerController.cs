@@ -17,8 +17,8 @@ namespace My2DGame
         [SerializeField]
         private float walkSpeed = 3f;           //걷는 속도
 
-        [SerializeField]                        //뛰는 속도
-        private float runSpeed = 6f;
+        [SerializeField]
+        private float runSpeed = 6f;            //뛰는 속도
 
         //입력 값
         private Vector2 inputMove = Vector2.zero;
@@ -28,7 +28,6 @@ namespace My2DGame
 
         //걷기
         private bool isMove = false;
-
         //뛰기
         private bool isRun = false;
         #endregion
@@ -44,15 +43,13 @@ namespace My2DGame
                 {
                     this.transform.localScale *= new Vector2(-1, 1);
                 }
-
                 isFacingRight = value;
             }
         }
 
         public bool IsMove
         {
-            get 
-            { return isMove; }
+            get { return isMove; }
             private set
             {
                 isMove = value;
@@ -105,8 +102,7 @@ namespace My2DGame
         private void FixedUpdate()
         {
             //좌우 이동
-            rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
-
+            rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);            
         }
         #endregion
 
@@ -118,11 +114,12 @@ namespace My2DGame
             {
                 IsFacingRight = true;
             }
-            else if(moveInput.x < 0f && IsFacingRight == true)   //왼쪽으로 이동
+            else if (moveInput.x < 0f && IsFacingRight == true)  //왼쪽으로 이동
             {
-                isFacingRight = false;
+                IsFacingRight = false;
             }
         }
+
         //이동 입력 처리
         public void OnMove(InputAction.CallbackContext context)
         {
@@ -132,20 +129,19 @@ namespace My2DGame
             SetFacingDirection(inputMove);
         }
 
-        //현 입력 처리
+        //런 입력 처리
         public void OnRun(InputAction.CallbackContext context)
         {
-            if(context.started) //버튼을 눌렀을 때 
+            if(context.started) //버튼을 눌렀을때
             {
                 IsRun = true;
-                //Debug.Log("플레이어가 뛰기 시작합니다");
             }
             else if(context.canceled) //버튼을 뗄때
             {
                 IsRun = false;
-                //Debug.Log("플레이어가 뛰기를 끝냅니다");
             }
         }
         #endregion
+
     }
 }

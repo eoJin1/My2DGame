@@ -17,7 +17,7 @@ namespace My2DGame
 
         #region Propety
         //시작 지점으로 부터 카메라의 이동 거리
-        public Vector2 CamMoveSinceStart => startPosition - (Vector2)cam.transform.position;
+        public Vector2 CamMoveSinceStart => startPosition - (Vector2)cam.transform.position;  
 
         //플레이어와 배경과의 거리
         public float zDistanceFromTarget => transform.position.z - followTarget.transform.position.z;
@@ -40,7 +40,7 @@ namespace My2DGame
 
         //시차에 의한 배경 이동 위치 구하기
         private void Update()
-        {
+        {   
             Vector2 newPostion = startPosition + CamMoveSinceStart * parrallaxFactor;
             this.transform.position = new Vector3(newPostion.x, newPostion.y, startZ);
         }

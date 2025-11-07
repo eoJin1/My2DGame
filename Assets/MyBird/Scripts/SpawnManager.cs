@@ -44,7 +44,7 @@ namespace MyBird
 
                 //타이머 초기화
                 countdown = 0f;
-                spawnTimer = 1f - GameManager.spawnValue;
+                spawnTimer = 1f; 
             }
         }
         #endregion
