@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 namespace My2DGame
 {
     /// <summary>
@@ -10,13 +11,87 @@ namespace My2DGame
         #region Variables
         //참조
         private Rigidbody2D rb2D;
+        private Animator animator;
 
         //이동
         [SerializeField]
-        private float walkSpeed = 1.0f;
+        private float walkSpeed = 3f;           //걷는 속도
+
+        [SerializeField]                        //뛰는 속도
+        private float runSpeed = 6f;
 
         //입력 값
         private Vector2 inputMove = Vector2.zero;
+
+        //반전
+        private bool isFacingRight = true;
+
+        //걷기
+        private bool isMove = false;
+
+        //뛰기
+        private bool isRun = false;
+        #endregion
+
+        #region Property
+        public bool IsFacingRight
+        {
+            get { return isFacingRight; }
+            private set
+            {
+                //반전 구현
+                if(isFacingRight != value)
+                {
+                    this.transform.localScale *= new Vector2(-1, 1);
+                }
+
+                isFacingRight = value;
+            }
+        }
+
+        public bool IsMove
+        {
+            get 
+            { return isMove; }
+            private set
+            {
+                isMove = value;
+                animator.SetBool(AnimationString.IsMove, value);
+            }
+        }
+
+        public bool IsRun
+        {
+            get { return isRun; }
+            private set
+            {
+                isRun = value;
+                animator.SetBool(AnimationString.IsRun, value);
+            }
+        }
+
+        //현재 이동 속도 - 읽기 전용
+        public float CurrentMoveSpeed
+        {
+            get
+            {
+                if(IsMove) //이동 가능
+                {
+                    if(IsRun)
+                    {
+                        return runSpeed;
+                    }
+                    else
+                    {
+                        return walkSpeed;
+                    }
+                }
+                else //이동 불가
+                {
+                    return 0f;
+                }
+            }
+        }
         #endregion
 
         #region Unity Event Method
@@ -24,21 +99,52 @@ namespace My2DGame
         {
             //참조
             rb2D = this.GetComponent<Rigidbody2D>();
+            animator = this.GetComponent<Animator>();
         }
 
         private void FixedUpdate()
         {
-            //이동
-            rb2D.linearVelocity = new Vector2(inputMove.x * walkSpeed, rb2D.linearVelocity.y);
-        }
+            //좌우 이동
+            rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
 
+        }
         #endregion
 
         #region Custom Method
+        //방향 전환
+        void SetFacingDirection(Vector2 moveInput)
+        {
+            if(moveInput.x > 0f && IsFacingRight == false)    //오른쪽으로 이동
+            {
+                IsFacingRight = true;
+            }
+            else if(moveInput.x < 0f && IsFacingRight == true)   //왼쪽으로 이동
+            {
+                isFacingRight = false;
+            }
+        }
+        //이동 입력 처리
         public void OnMove(InputAction.CallbackContext context)
         {
             inputMove = context.ReadValue<Vector2>();
-            Debug.Log(inputMove);
+            IsMove = (inputMove != Vector2.zero);
+            //방향 전환
+            SetFacingDirection(inputMove);
+        }
+
+        //현 입력 처리
+        public void OnRun(InputAction.CallbackContext context)
+        {
+            if(context.started) //버튼을 눌렀을 때 
+            {
+                IsRun = true;
+                //Debug.Log("플레이어가 뛰기 시작합니다");
+            }
+            else if(context.canceled) //버튼을 뗄때
+            {
+                IsRun = false;
+                //Debug.Log("플레이어가 뛰기를 끝냅니다");
+            }
         }
         #endregion
     }
