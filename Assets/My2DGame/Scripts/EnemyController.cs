@@ -1,10 +1,11 @@
 using UnityEngine;
+
 namespace My2DGame
 {
     /// <summary>
     /// Enemy를 관리하는 클래스
     /// </summary>
-    [RequireComponent(typeof(Rigidbody2D),(typeof(TouchingDirections)))]
+    [RequireComponent (typeof(Rigidbody2D), typeof(TouchingDirections))]
     public class EnemyController : MonoBehaviour
     {
         #region Variables
@@ -13,27 +14,38 @@ namespace My2DGame
         private TouchingDirections touchingDirections;
         private Animator animator;
 
+        //적 감지
+        public DetectionZone detectionZone;
+
         //이동
         //이동 속도
-        [SerializeField] private float runSpeed = 4f; 
+        [SerializeField] private float runSpeed = 4f;   
         //이동 방향
         private Vector2 directionVector = Vector2.right;
+
         //이동 가능한 방향 정의
         public enum WalkableDirection
         {
             Left,
             Right
         }
+
         //현재 이동 방향
         private WalkableDirection walkDirection = WalkableDirection.Right;
+
+        //감속 Lerp 계수 
+        [SerializeField] private float stopRate = 0.2f;
+
+        //적 감지 - 타겟이 있다
+        private bool hasTarget = false;
         #endregion
 
         #region Property
         public WalkableDirection WalkDirection
         {
             get { return walkDirection; }
-            private set 
-            { 
+            private set
+            {
                 //방향 전환이 일어난 시점
                 if(walkDirection != value)
                 {
@@ -41,7 +53,7 @@ namespace My2DGame
                     transform.localScale *= new Vector2(-1, 1);
 
                     //value값에 따라 이동 방향 설정
-                    if(value == WalkableDirection.Left)
+                    if (value == WalkableDirection.Left)
                     {
                         directionVector = Vector2.left;
                     }
@@ -51,8 +63,27 @@ namespace My2DGame
                     }
                 }
 
+                walkDirection = value;
+            }
+        }
 
-                walkDirection = value; 
+        //애니메이터의 파라미터 값(CannotMove) 읽어오기
+        public bool CannotMove
+        {
+            get
+            {
+                return animator.GetBool(AnimationString.CannotMove);
+            }
+        }
+
+        //적 감지
+        public bool HasTarget
+        {
+            get { return hasTarget; }
+            set
+            {
+                hasTarget = value;
+                animator.SetBool(AnimationString.HasTarget, value);
             }
         }
         #endregion
@@ -65,6 +96,13 @@ namespace My2DGame
             touchingDirections = this.GetComponent<TouchingDirections>();
             animator = this.GetComponent<Animator>();
         }
+
+        private void Update()
+        {
+            //적 감지
+            HasTarget = (detectionZone.detectedColliders.Count > 0);
+        }
+
         private void FixedUpdate()
         {
             //벽 체크
@@ -74,7 +112,15 @@ namespace My2DGame
             }
 
             //이동하기
-            rb2D.linearVelocity = new Vector2(directionVector.x * runSpeed, rb2D.linearVelocityY);
+            if(CannotMove)
+            {
+                //감속 rb2D.linearVelocityX -> 0
+                rb2D.linearVelocity = new Vector2(Mathf.Lerp(rb2D.linearVelocityX, 0f, stopRate), rb2D.linearVelocityY);
+            }
+            else
+            {
+                rb2D.linearVelocity = new Vector2(directionVector.x * runSpeed, rb2D.linearVelocityY);
+            }   
         }
         #endregion
 
@@ -82,17 +128,17 @@ namespace My2DGame
         //방향 전환
         void Flip()
         {
-            if(walkDirection == WalkableDirection.Left)
+            if (WalkDirection == WalkableDirection.Left)
             {
-                walkDirection = WalkableDirection.Right;
+                WalkDirection = WalkableDirection.Right;
             }
-            else if(walkDirection == WalkableDirection.Right)
+            else if(WalkDirection == WalkableDirection.Right)
             {
-                walkDirection = WalkableDirection.Left;
+                WalkDirection = WalkableDirection.Left;
             }
             else
             {
-                Debug.Log("Error Flip");
+                Debug.Log("Erro Flip Direction");
             }
         }
         #endregion

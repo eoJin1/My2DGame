@@ -1,17 +1,18 @@
 using UnityEngine;
+
 namespace My2DGame
 {
     /// <summary>
-    /// 애니메이터 bool타입 파라미터값을 설정하는 클래스
-    /// 애니메이터의 sub StateMachine에서 들어갈때와 나갈때 값 설정
+    /// 애니메이터 bool타입 파라미터 값을 설정하는 클래스
+    /// 애니메이터의 Sub StateMachine에서 들어갈때와 나갈때 값 설정
     /// </summary>
     public class SetBoolStateMachineBehaviour : StateMachineBehaviour
     {
         #region Variables
-        public string boolName;     //bool 타입 파라미터 이름
+        public string boolName;     //bool타입 파라미터 이름
 
-        public bool enterValue;     //애니메이터의 sub StateMachine에서 들어갈때 값
-        public bool exitValue;      //애니메이터의 sub StateMachine에서 나갈때 값
+        public bool enterValue;     //애니메이터의 Sub StateMachine에서 들어갈때 값
+        public bool exitValue;      //애니메이터의 Sub StateMachine에서 나갈때 값
         #endregion
 
         // OnStateMachineEnter is called when entering a state machine via its Entry Node

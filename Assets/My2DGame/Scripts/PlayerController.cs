@@ -13,11 +13,12 @@ namespace My2DGame
         private Rigidbody2D rb2D;
         private Animator animator;
         private TouchingDirections touchingDirections;
+        private Damageable damageable;
 
         //이동
-        [SerializeField] private float walkSpeed = 3f;           //걷는 속도
-        [SerializeField] private float runSpeed = 6f;            //뛰는 속도
-        [SerializeField] private float airSpeed = 2f;            //공중 속도
+        [SerializeField] private float walkSpeed = 3f;          //걷는 속도
+        [SerializeField] private float runSpeed = 6f;           //뛰는 속도
+        [SerializeField] private float airSpeed = 2f;           //공중 속도
 
         //입력 값
         private Vector2 inputMove = Vector2.zero;
@@ -27,14 +28,12 @@ namespace My2DGame
 
         //걷기
         private bool isMove = false;
-
         //뛰기
         private bool isRun = false;
 
         //점프
         [SerializeField]
         private float jumpForce = 5f;
-
         #endregion
 
         #region Property
@@ -77,13 +76,14 @@ namespace My2DGame
         {
             get
             {
-                if(CannotMove)
+                if(CannotMove)  //애니메니터 파라미터 값 읽어오기
                 {
                     return 0f;
                 }
-                if (IsMove && touchingDirections.IsWall == false) //이동 가능
+
+                if(IsMove && touchingDirections.IsWall == false) //이동 가능
                 {
-                    if (touchingDirections.IsGround) //땅에 있을때
+                    if(touchingDirections.IsGround) //땅에 있을때
                     {
                         if (IsRun)
                         {
@@ -106,12 +106,21 @@ namespace My2DGame
             }
         }
 
-        //애니메이터의 파라미터값(CannotMove) 읽어오기
+        //애니메이터의 파라미터 값(CannotMove) 읽어오기
         public bool CannotMove
         {
             get
             {
                 return animator.GetBool(AnimationString.CannotMove);
+            }
+        }
+
+        //애니메이터의 파라미터 값(LockVelocity) 읽어오기
+        public bool LockVelocity
+        {
+            get
+            {
+                return animator.GetBool(AnimationString.LockVelocity);
             }
         }
         #endregion
@@ -123,12 +132,19 @@ namespace My2DGame
             rb2D = this.GetComponent<Rigidbody2D>();
             animator = this.GetComponent<Animator>();
             touchingDirections = this.GetComponent<TouchingDirections>();
+            damageable = this.GetComponent<Damageable>();
+
+            //이벤트 함수 등록
+            damageable.hitAction += OnHit;
         }
 
         private void FixedUpdate()
         {
             //좌우 이동
-            rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
+            if(LockVelocity == false)
+            {
+                rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
+            }
 
             //점프 애니메이션
             animator.SetFloat(AnimationString.YVelocity, rb2D.linearVelocityY);
@@ -139,6 +155,9 @@ namespace My2DGame
         //방향 전환
         void SetFacingDirection(Vector2 moveInput)
         {
+            if (CannotMove)
+                return;
+
             if(moveInput.x > 0f && IsFacingRight == false)    //오른쪽으로 이동
             {
                 IsFacingRight = true;
@@ -176,19 +195,25 @@ namespace My2DGame
         {
             if (context.started && touchingDirections.IsGround)
             {
+                //Debug.Log("플레이어가 점프 합니다");
                 animator.SetTrigger(AnimationString.JumpTrigger);
                 rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, jumpForce);
-
             }
         }
 
         //공격 입력 처리
         public void OnAttack(InputAction.CallbackContext context)
         {
-            if (context.started && touchingDirections.IsGround) //땅에서만 공격
+            if(context.started && touchingDirections.IsGround)
             {
                 animator.SetTrigger(AnimationString.AttackTrigger);
             }
+        }
+
+        //데미지 이벤트에 등록되는 함수
+        public void OnHit(float damage, Vector2 knockback)
+        {
+            rb2D.linearVelocity = new Vector2(knockback.x, rb2D.linearVelocityY + knockback.y);
         }
         #endregion
 
